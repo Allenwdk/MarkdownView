@@ -1,26 +1,1098 @@
-@import "tailwindcss";
+/**
+ * 全局样式
+ * 包含 CSS 变量、主题系统、响应式布局和组件样式
+ */
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* ============================================
+   CSS 变量定义（主题系统）
+   ============================================ */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 浅色主题（默认） */
+:root,
+.light {
+  /* 背景色 */
+  --bg-primary: #f8f9fc;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #f1f3f9;
+  --bg-code: #f5f6f8;
+
+  /* 文字色 */
+  --text-primary: #1a1a2e;
+  --text-secondary: #4a4a6a;
+  --text-tertiary: #8888a0;
+  --text-link: #4263eb;
+
+  /* 边框和分割线 */
+  --border-color: #e2e5f0;
+  --border-hover: #c5c9da;
+
+  /* 强调色 */
+  --accent-primary: #4263eb;
+  --accent-hover: #3b5bdb;
+  --accent-light: #edf2ff;
+
+  /* 功能色 */
+  --success: #2ecc71;
+  --warning: #f39c12;
+  --error: #e74c3c;
+
+  /* 阴影 */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.1);
+
+  /* 编辑器特殊 */
+  --editor-bg: #ffffff;
+  --editor-text: #24292e;
+  --editor-line-highlight: #f1f3f9;
+
+  /* 滚动条 */
+  --scrollbar-thumb: #c5c9da;
+  --scrollbar-track: #f1f3f9;
+
+  /* 过渡动画 */
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* 深色主题 */
+:root.dark,
+.dark {
+  /* 背景色 */
+  --bg-primary: #0d1117;
+  --bg-secondary: #161b22;
+  --bg-tertiary: #1c2333;
+  --bg-code: #1a1f2e;
+
+  /* 文字色 */
+  --text-primary: #e6edf3;
+  --text-secondary: #8b949e;
+  --text-tertiary: #6e7681;
+  --text-link: #58a6ff;
+
+  /* 边框和分割线 */
+  --border-color: #30363d;
+  --border-hover: #484f58;
+
+  /* 强调色 */
+  --accent-primary: #58a6ff;
+  --accent-hover: #79b8ff;
+  --accent-light: #1a2332;
+
+  /* 功能色 */
+  --success: #3fb950;
+  --warning: #d29922;
+  --error: #f85149;
+
+  /* 阴影 */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
+
+  /* 编辑器特殊 */
+  --editor-bg: #0d1117;
+  --editor-text: #c9d1d9;
+  --editor-line-highlight: #161b22;
+
+  /* 滚动条 */
+  --scrollbar-thumb: #484f58;
+  --scrollbar-track: #161b22;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ============================================
+   全局基础样式
+   ============================================ */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans',
+    'Helvetica Neue', Arial, 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei',
+    sans-serif;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.6;
+  transition: background-color var(--transition-normal),
+    color var(--transition-normal);
+  min-height: 100vh;
+}
+
+/* 自定义滚动条 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-tertiary);
+}
+
+/* ============================================
+   应用容器
+   ============================================ */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* ============================================
+   顶部导航栏
+   ============================================ */
+.header {
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+  padding: 0 24px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: var(--shadow-sm);
+  transition: background-color var(--transition-normal),
+    border-color var(--transition-normal);
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.header-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.header-icon {
+  width: 28px;
+  height: 28px;
+  color: var(--accent-primary);
+}
+
+.header-text {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* ============================================
+   主题切换器
+   ============================================ */
+.theme-toggle-wrapper {
+  position: relative;
+}
+
+.theme-toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  color: var(--text-primary);
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: all var(--transition-fast);
+}
+
+.theme-toggle-btn:hover {
+  border-color: var(--border-hover);
+  background: var(--accent-light);
+}
+
+.theme-toggle-icon {
+  font-size: 1rem;
+}
+
+.theme-toggle-arrow {
+  width: 16px;
+  height: 16px;
+  transition: transform var(--transition-fast);
+}
+
+.theme-toggle-arrow.open {
+  transform: rotate(180deg);
+}
+
+.theme-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  box-shadow: var(--shadow-lg);
+  padding: 6px;
+  min-width: 140px;
+  z-index: 200;
+  animation: fadeInDown 0.2s ease;
+}
+
+.theme-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  background: none;
+  border: none;
+  border-radius: 6px;
+  color: var(--text-primary);
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: background var(--transition-fast);
+}
+
+.theme-dropdown-item:hover {
+  background: var(--bg-tertiary);
+}
+
+.theme-dropdown-item.active {
+  background: var(--accent-light);
+  color: var(--accent-primary);
+}
+
+.theme-dropdown-icon {
+  font-size: 1rem;
+}
+
+.theme-dropdown-check {
+  margin-left: auto;
+  font-size: 0.75rem;
+  color: var(--accent-primary);
+}
+
+/* ============================================
+   主内容区域
+   ============================================ */
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 16px 24px;
+}
+
+/* 工具栏栏 */
+.toolbar-bar {
+  display: flex;
+  justify-content: flex-end;
+  padding: 8px 0 16px;
+}
+
+/* ============================================
+   导出按钮
+   ============================================ */
+.export-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.export-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all var(--transition-fast);
+}
+
+.export-btn:hover:not(:disabled) {
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+  background: var(--accent-light);
+}
+
+.export-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.export-btn.exporting {
+  animation: pulse 1.5s infinite;
+}
+
+.export-icon {
+  width: 16px;
+  height: 16px;
+}
+
+/* ============================================
+   编辑器和预览容器
+   ============================================ */
+.editor-preview-container {
+  display: flex;
+  gap: 16px;
+  flex: 1;
+  min-height: 0;
+}
+
+.editor-column,
+.preview-column {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+
+/* ============================================
+   编辑器面板
+   ============================================ */
+.editor-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  transition: border-color var(--transition-normal),
+    box-shadow var(--transition-normal);
+}
+
+.editor-panel:focus-within {
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 3px var(--accent-light);
+}
+
+.editor-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--bg-tertiary);
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.toolbar-title {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* 文件上传 */
+.file-upload-area {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.file-upload-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: var(--accent-primary);
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 500;
+  transition: background var(--transition-fast);
+}
+
+.file-upload-btn:hover {
+  background: var(--accent-hover);
+}
+
+.file-upload-icon {
+  width: 14px;
+  height: 14px;
+}
+
+.file-upload-text {
+  white-space: nowrap;
+}
+
+.file-input-hidden {
+  display: none;
+}
+
+.file-drop-zone {
+  padding: 4px 8px;
+  border: 1px dashed var(--border-color);
+  border-radius: 6px;
+  text-align: center;
+  transition: all var(--transition-fast);
+}
+
+.file-drop-zone:hover,
+.file-drop-zone.dragging {
+  border-color: var(--accent-primary);
+  background: var(--accent-light);
+}
+
+.file-drop-text {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.file-drop-hint {
+  font-size: 0.65rem;
+  color: var(--text-tertiary);
+  margin-top: 2px;
+}
+
+/* 文本输入框 */
+.markdown-textarea {
+  flex: 1;
+  width: 100%;
+  padding: 16px;
+  background: var(--editor-bg);
+  color: var(--editor-text);
+  border: none;
+  outline: none;
+  resize: none;
+  font-family: 'JetBrains Mono', 'Fira Code', 'SF Mono', Menlo, Consolas,
+    monospace;
+  font-size: 0.875rem;
+  line-height: 1.7;
+  tab-size: 2;
+}
+
+.markdown-textarea::placeholder {
+  color: var(--text-tertiary);
+}
+
+/* ============================================
+   预览面板
+   ============================================ */
+.preview-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  transition: border-color var(--transition-normal),
+    box-shadow var(--transition-normal);
+}
+
+.preview-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--bg-tertiary);
+}
+
+.preview-status {
+  font-size: 0.7rem;
+  color: var(--success);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.preview-status::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  background: var(--success);
+  border-radius: 50%;
+  display: inline-block;
+}
+
+/* Markdown 渲染内容样式 */
+.markdown-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+  font-size: 0.938rem;
+  line-height: 1.75;
+  color: var(--text-primary);
+}
+
+/* 标题样式 */
+.markdown-body h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0.8em 0 0.5em;
+  padding-bottom: 0.4em;
+  border-bottom: 2px solid var(--border-color);
+  line-height: 1.3;
+}
+
+.markdown-body h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 1em 0 0.5em;
+  padding-bottom: 0.3em;
+  border-bottom: 1px solid var(--border-color);
+  line-height: 1.3;
+}
+
+.markdown-body h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0.8em 0 0.4em;
+  line-height: 1.3;
+}
+
+.markdown-body h4,
+.markdown-body h5,
+.markdown-body h6 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0.8em 0 0.4em;
+  line-height: 1.3;
+}
+
+/* 段落和文本 */
+.markdown-body p {
+  margin: 0.8em 0;
+}
+
+.markdown-body strong {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.markdown-body em {
+  font-style: italic;
+}
+
+.markdown-body a {
+  color: var(--text-link);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color var(--transition-fast);
+}
+
+.markdown-body a:hover {
+  border-bottom-color: var(--text-link);
+}
+
+/* 引用 */
+.markdown-body blockquote {
+  margin: 1em 0;
+  padding: 0.5em 1em;
+  border-left: 4px solid var(--accent-primary);
+  background: var(--bg-tertiary);
+  border-radius: 0 8px 8px 0;
+  color: var(--text-secondary);
+}
+
+.markdown-body blockquote p {
+  margin: 0;
+}
+
+/* 列表 */
+.markdown-body ul,
+.markdown-body ol {
+  margin: 0.8em 0;
+  padding-left: 1.5em;
+}
+
+.markdown-body li {
+  margin: 0.3em 0;
+}
+
+.markdown-body li > ul,
+.markdown-body li > ol {
+  margin: 0.3em 0;
+}
+
+/* 任务列表 */
+.markdown-body ul[data-type='taskList'] {
+  list-style: none;
+  padding-left: 0;
+}
+
+.markdown-body ul[data-type='taskList'] li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+/* 代码 */
+.markdown-body code {
+  font-family: 'JetBrains Mono', 'Fira Code', 'SF Mono', Menlo, Consolas,
+    monospace;
+  font-size: 0.85em;
+  padding: 0.2em 0.4em;
+  background: var(--bg-code);
+  border-radius: 4px;
+  color: var(--accent-primary);
+}
+
+.markdown-body pre {
+  margin: 1em 0;
+  padding: 0;
+  background: var(--bg-code) !important;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+}
+
+.markdown-body pre code {
+  display: block;
+  padding: 16px 20px;
+  overflow-x: auto;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  background: transparent !important;
+}
+
+/* 表格 */
+.markdown-body table {
+  width: 100%;
+  margin: 1em 0;
+  border-collapse: collapse;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.markdown-body th {
+  background: var(--bg-tertiary);
+  font-weight: 600;
+  text-align: left;
+  padding: 10px 16px;
+  border: 1px solid var(--border-color);
+}
+
+.markdown-body td {
+  padding: 10px 16px;
+  border: 1px solid var(--border-color);
+}
+
+.markdown-body tr:nth-child(even) {
+  background: var(--bg-tertiary);
+}
+
+/* 分割线 */
+.markdown-body hr {
+  margin: 1.5em 0;
+  border: none;
+  border-top: 2px solid var(--border-color);
+}
+
+/* 图片 */
+.markdown-body img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin: 0.8em 0;
+}
+
+/* 占位符 */
+.preview-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 30px;
+  text-align: center;
+  color: var(--text-tertiary);
+}
+
+.preview-placeholder svg {
+  width: 64px;
+  height: 64px;
+  margin-bottom: 20px;
+  opacity: 0.4;
+}
+
+.preview-placeholder h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: var(--text-secondary);
+}
+
+.preview-placeholder p {
+  font-size: 0.9rem;
+  margin-bottom: 24px;
+}
+
+.preview-hints {
+  text-align: left;
+  background: var(--bg-tertiary);
+  padding: 20px 24px;
+  border-radius: 10px;
+  max-width: 400px;
+  width: 100%;
+}
+
+.preview-hints p {
+  margin: 6px 0;
+  font-size: 0.85rem;
+  text-align: left;
+}
+
+.preview-hints code {
+  font-size: 0.8em;
+}
+
+/* ============================================
+   底部信息栏
+   ============================================ */
+.footer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 24px;
+  padding: 16px 24px;
+  border-top: 1px solid var(--border-color);
+  font-size: 0.8rem;
+  color: var(--text-tertiary);
+  background: var(--bg-secondary);
+  transition: all var(--transition-normal);
+}
+
+/* ============================================
+   动画
+   ============================================ */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 20px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+/* ============================================
+   响应式设计（移动端适配）
+   ============================================ */
+
+/* 平板和 smaller 桌面端 */
+@media (max-width: 1024px) {
+  .main-content {
+    padding: 12px 16px;
+  }
+
+  .header {
+    padding: 0 16px;
+  }
+
+  .markdown-body {
+    padding: 20px;
+  }
+}
+
+/* 移动端 */
+@media (max-width: 768px) {
+  .editor-preview-container {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .editor-column,
+  .preview-column {
+    min-height: 45vh;
+  }
+
+  .header-text {
+    font-size: 1.1rem;
+  }
+
+  .header-icon {
+    width: 24px;
+    height: 24px;
+  }
+
+  .toolbar-bar {
+    padding: 4px 0 12px;
+  }
+
+  .export-buttons {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .editor-toolbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .markdown-body {
+    padding: 16px;
+    font-size: 0.9rem;
+  }
+
+  .markdown-body h1 {
+    font-size: 1.6rem;
+  }
+
+  .markdown-body h2 {
+    font-size: 1.3rem;
+  }
+
+  .markdown-body table {
+    font-size: 0.85rem;
+  }
+
+  .markdown-body th,
+  .markdown-body td {
+    padding: 8px 10px;
+  }
+
+  .footer {
+    flex-direction: column;
+    gap: 4px;
+    padding: 12px 16px;
+  }
+
+  .preview-placeholder {
+    padding: 40px 20px;
+  }
+
+  .preview-placeholder svg {
+    width: 48px;
+    height: 48px;
+  }
+}
+
+/* 小屏手机 */
+@media (max-width: 480px) {
+  .header {
+    padding: 0 12px;
+    height: 54px;
+  }
+
+  .header-text {
+    font-size: 1rem;
+  }
+
+  .main-content {
+    padding: 8px 10px;
+  }
+
+  .export-btn {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+  }
+
+  .export-btn span {
+    display: none;
+  }
+
+  .markdown-textarea {
+    padding: 12px;
+    font-size: 0.85rem;
+  }
+
+  .markdown-body {
+    padding: 14px;
+  }
+
+  .file-upload-text {
+    display: none;
+  }
+}
+
+/* ============================================
+   highlight.js 代码高亮主题适配
+   ============================================ */
+
+/* 浅色主题下的代码高亮 */
+.light .hljs,
+:root .hljs {
+  background: #f6f8fc !important;
+  color: #24292e !important;
+}
+
+.light .hljs-comment,
+:root .hljs-comment {
+  color: #6a737d;
+}
+
+.light .hljs-keyword,
+:root .hljs-keyword {
+  color: #d73a49;
+}
+
+.light .hljs-string,
+:root .hljs-string {
+  color: #032f62;
+}
+
+.light .hljs-number,
+:root .hljs-number {
+  color: #005cc5;
+}
+
+.light .hljs-title,
+:root .hljs-title {
+  color: #6f42c1;
+}
+
+.light .hljs-built_in,
+:root .hljs-built_in,
+.light .hljs-params,
+:root .hljs-params {
+  color: #e36209;
+}
+
+.light .hljs-meta,
+:root .hljs-meta {
+  color: #6a737d;
+}
+
+/* 深色主题下的代码高亮 */
+.dark .hljs {
+  background: #1a1f2e !important;
+  color: #c9d1d9 !important;
+}
+
+.dark .hljs-comment,
+.dark .hljs-quote {
+  color: #6e7681;
+}
+
+.dark .hljs-keyword,
+.dark .hljs-selector-tag {
+  color: #ff7b72;
+}
+
+.dark .hljs-literal,
+.dark .hljs-variable {
+  color: #79c0ff;
+}
+
+.dark .hljs-template-variable,
+.dark .hljs-template-tag,
+.dark .hljs-string {
+  color: #a5d6ff;
+}
+
+.dark .hljs-number {
+  color: #79c0ff;
+}
+
+.dark .hljs-operator,
+.dark .hljs-doctag {
+  color: #ff7b72;
+}
+
+.dark .hljs-regexp,
+.dark .hljs-symbol {
+  color: #d2a8ff;
+}
+
+.dark .hljs-title,
+.dark .hljs-section {
+  color: #d2a8ff;
+}
+
+.dark .hljs-name,
+.dark .hljs-type,
+.dark .hljs-attr,
+.dark .hljs-attribute {
+  color: #79c0ff;
+}
+
+.dark .hljs-symbol,
+.dark .hljs-bullet,
+.dark .hljs-link,
+.dark .hljs-built_in,
+.dark .hljs-builtin-name {
+  color: #ffa657;
+}
+
+.dark .hljs-meta {
+  color: #6e7681;
+}
+
+.dark .hljs-deletion {
+  background: #ffa07a33;
+}
+
+.dark .hljs-addition {
+  background: #56d36433;
+}
+
+/* 确保代码块背景不被覆盖 */
+.markdown-body pre {
+  background-color: var(--bg-code) !important;
+}
+
+.markdown-body pre code {
+  background: transparent !important;
 }
