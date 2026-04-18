@@ -4,10 +4,9 @@
  */
 
 import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
 
 /**
- * 将预览区域导出为 PDF 并下载
+ * 将预览区域导出为 PDF 并下载（矢量化 PDF）
  * @param element - 要导出的 DOM 元素
  * @param filename - 下载的文件名（不含扩展名）
  */
@@ -21,47 +20,128 @@ export async function exportToPDF(element: HTMLElement | null, filename: string 
     // 显示加载提示
     showExportingStatus('正在生成 PDF...');
 
-    // 使用 html2canvas 将 DOM 元素转换为 canvas
-    // scale: 2 提高导出清晰度
-    const canvas = await html2canvas(element, {
-      scale: 2,
-      useCORS: true, // 允许跨域图片
-      logging: false, // 关闭日志
-      backgroundColor: getComputedStyle(document.documentElement).backgroundColor || '#ffffff',
-    });
+    // 获取预览容器的实际尺寸
+    const rect = element.getBoundingClientRect();
+    const width = Math.floor(rect.width);
+    const height = Math.floor(rect.height);
 
-    // 计算 PDF 尺寸（A4 比例）
-    const imgWidth = 210; // A4 宽度（毫米）
-    const pageHeight = 297; // A4 高度（毫米）
-    const imgHeight = (canvas.height * imgWidth) / canvas.width;
-    const imgUrl = canvas.toDataURL('image/png');
+    // 创建一个隐藏的 iframe 用于打印
+    const iframe = document.createElement('iframe');
+    iframe.style.position = 'fixed';
+    iframe.style.left = '-9999px';
+    iframe.style.width = `${width}px`;
+    iframe.style.height = `${height}px`;
+    document.body.appendChild(iframe);
 
-    // 创建 jsPDF 实例
-    const pdf = new jsPDF('p', 'mm', 'a4');
+     // 获取当前页面的样式，将相对 URL 转换为绝对 URL
+    const styles = Array.from(document.querySelectorAll('link[rel="stylesheet"], style'))
+      .map(tag => {
+        if (tag.tagName === 'LINK' && tag.hasAttribute('href')) {
+          const href = tag.getAttribute('href');
+          if (href && !href.startsWith('http') && !href.startsWith('data:')) {
+            try {
+              const absoluteHref = new URL(href, window.location.href).href;
+              return tag.outerHTML.replace(`href="${href}"`, `href="${absoluteHref}"`);
+            } catch {
+              return tag.outerHTML;
+            }
+          }
+        }
+        return tag.outerHTML;
+      })
+      .join('\n');
 
-    // 如果内容超过一页，分页处理
-    let position = 0;
-    let heightLeft = imgHeight;
+     // PDF 导出统一使用浅色模板，避免深色模式背景渲染问题
+    const lightBg = '#f8f9fc';
+    const lightText = '#1a1a2e';
 
-    // 第一页
-    pdf.addImage(imgUrl, 'PNG', 0, position, imgWidth, imgHeight);
-    heightLeft -= pageHeight;
+    // 获取 .markdown-body 的内容
+    const markdownBody = element.querySelector('.markdown-body');
+    const bodyContent = markdownBody ? markdownBody.innerHTML : element.innerHTML;
 
-    // 添加后续页面
-    while (heightLeft > 0) {
-      position -= pageHeight;
-      pdf.addPage();
-      pdf.addImage(imgUrl, 'PNG', 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
+    // 构建 iframe 的 HTML 内容（强制浅色主题）
+    const iframeHTML = `
+      <!DOCTYPE html>
+      <html class="light">
+        <head>
+          ${styles}
+          <style>
+            /* 重置样式 */
+            * {
+              margin: 0;
+              padding: 0;
+              box-sizing: border-box;
+            }
+
+            body {
+              width: ${width}px;
+              height: ${height}px;
+              overflow: hidden;
+              background-color: ${lightBg} !important;
+              color: ${lightText} !important;
+            }
+
+            /* 确保 markdown-body 样式正确应用 */
+            .markdown-body {
+              width: ${width}px;
+              padding: 24px;
+            }
+
+            /* 打印样式 */
+            @media print {
+              body {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+              }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="markdown-body">
+            ${bodyContent}
+          </div>
+        </body>
+      </html>
+    `;
+
+    // 写入 iframe
+    const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+    if (iframeDoc) {
+      iframeDoc.open();
+      iframeDoc.write(iframeHTML);
+      iframeDoc.close();
     }
 
-    // 保存 PDF 文件
-    pdf.save(`${filename}.pdf`);
+    // 等待样式加载完成
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    // 调用打印对话框，用户可以选择"另存为 PDF"
+    iframe.contentWindow?.focus();
+    
+    // 显示提示
     hideExportingStatus();
+    
+    // 使用 window.print() 生成矢量化 PDF
+    // 用户可以在打印对话框中选择"另存为 PDF"
+    const printWindow = iframe.contentWindow;
+    if (printWindow) {
+      printWindow.print();
+    }
+
+    // 清理 iframe
+    setTimeout(() => {
+      document.body.removeChild(iframe);
+    }, 1000);
   } catch (error) {
     console.error('PDF 导出失败:', error);
     alert('PDF 导出失败，请稍后重试');
     hideExportingStatus();
+    
+    // 清理 iframe
+    const iframe = document.querySelector('iframe');
+    if (iframe) {
+      document.body.removeChild(iframe);
+    }
   }
 }
 
@@ -76,16 +156,27 @@ export async function exportToPNG(element: HTMLElement | null, filename: string 
     return;
   }
 
-  try {
+   try {
     showExportingStatus('正在生成 PNG...');
 
+    // 只获取 .markdown-body 内容，不包含工具栏
+    const markdownBody = element.querySelector('.markdown-body') as HTMLElement | null;
+    const targetElement = markdownBody || element;
+
+    // 获取当前主题的计算背景色（从 body 获取，因为 CSS 中背景色定义在 body 上）
+    const computedBg = getComputedStyle(document.body).backgroundColor;
+    const originalBg = targetElement.style.backgroundColor;
+    targetElement.style.backgroundColor = computedBg;
+
     // 使用 html2canvas 将 DOM 元素转换为 canvas
-    const canvas = await html2canvas(element, {
+    const canvas = await html2canvas(targetElement, {
       scale: 3, // PNG 使用更高倍率以获得更好清晰度
       useCORS: true,
       logging: false,
-      backgroundColor: getComputedStyle(document.documentElement).backgroundColor || '#ffffff',
     });
+
+    // 恢复原始背景色
+    targetElement.style.backgroundColor = originalBg;
 
     // 将 canvas 转换为 PNG Data URL
     const imgUrl = canvas.toDataURL('image/png');

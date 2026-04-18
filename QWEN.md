@@ -24,7 +24,7 @@
 | Markdown 解析 | marked | 18.0.1 |
 | 代码高亮 | highlight.js | 11.11.1 |
 | XSS 防护 | DOMPurify | 3.4.0 |
-| PDF 导出 | jsPDF + html2canvas | 4.2.1 / 1.4.1 |
+| PDF 导出 | iframe + window.print()（矢量化 PDF） |
 | 样式 | Tailwind CSS 4 + CSS 变量 | 4.x |
 
 ## 项目结构
@@ -117,9 +117,8 @@ dangerouslySetInnerHTML → 渲染到页面
 ### 导出流程
 
 1. 通过 `useRef` 获取预览区域 DOM 元素
-2. `html2canvas` 将 DOM 转为 canvas（scale 2x/3x 保证清晰度）
-3. **PDF**: canvas → DataURL → jsPDF 分页打包 → 下载
-4. **PNG**: canvas → DataURL → 临时 `<a>` 标签触发下载
+2. **PNG**: 提取 `.markdown-body` 内容 → `html2canvas` 转为 canvas（scale 3x）→ DataURL → 下载
+3. **PDF**: 创建隐藏 iframe → 注入当前页面 CSS（绝对 URL）和主题 class → `window.print()` 生成矢量化 PDF → 用户选择"另存为 PDF"
 
 ## 开发约定
 

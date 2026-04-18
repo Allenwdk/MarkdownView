@@ -972,46 +972,37 @@ body {
    ============================================ */
 
 /* 浅色主题下的代码高亮 */
-.light .hljs,
-:root .hljs {
+.light .hljs {
   background: #f6f8fc !important;
   color: #24292e !important;
 }
 
-.light .hljs-comment,
-:root .hljs-comment {
+.light .hljs-comment {
   color: #6a737d;
 }
 
-.light .hljs-keyword,
-:root .hljs-keyword {
+.light .hljs-keyword {
   color: #d73a49;
 }
 
-.light .hljs-string,
-:root .hljs-string {
+.light .hljs-string {
   color: #032f62;
 }
 
-.light .hljs-number,
-:root .hljs-number {
+.light .hljs-number {
   color: #005cc5;
 }
 
-.light .hljs-title,
-:root .hljs-title {
+.light .hljs-title {
   color: #6f42c1;
 }
 
 .light .hljs-built_in,
-:root .hljs-built_in,
-.light .hljs-params,
-:root .hljs-params {
+.light .hljs-params {
   color: #e36209;
 }
 
-.light .hljs-meta,
-:root .hljs-meta {
+.light .hljs-meta {
   color: #6a737d;
 }
 
